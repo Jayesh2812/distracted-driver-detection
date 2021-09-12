@@ -1,0 +1,17 @@
+<input type="datetime-local" name="" id="haha" >
+
+<script>
+    document.querySelector('#haha').onblur = (e)=>{
+        let d = new Date(e.target.value)
+
+        console.log(d.toISOString())
+    }
+</script>
+
+
+duration : 1223344
+
+duration :{days : 12, seconds :12}
+startTime : '2021-06-19T18:46:22.890403+00:00'
+
+[sensor_name, '2021-07-18T15:20:31.715488+00:00', '2021-07-18T15:20:31.715488+00:00']
