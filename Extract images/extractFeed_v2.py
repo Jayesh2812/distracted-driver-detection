@@ -1,14 +1,16 @@
 import cv2
 from datetime import datetime
-
+class Webcam:
+    phone = 1
+    laptop = 0
 class Video:
-    def __init__(self, name = 'Frames', seconds_to_run=1):
+    def __init__(self, name = 'Frames', seconds_to_run=10):
         self.name = name
         self.frames=[]
         self.record = False
         self.startTime = None
         self.endTime = None
-        self.vid = cv2.VideoCapture(1)
+        self.vid = cv2.VideoCapture(Webcam.laptop)
         self.msg = 'Press Spacebar to start recording'
         self.seconds_to_run = seconds_to_run
         self.FPS = 2
