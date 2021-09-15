@@ -6,3 +6,5 @@
 `Extract images` folder has python script to extract images from webcam and mobile phone camera.
 
 `Upload Images` contains scripts for uploading images to server.
+
+After pulling perform `python manage.py migrate`, `pip install -r requirements.txt` to stay up to date
