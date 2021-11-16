@@ -1,4 +1,13 @@
 import cv2
+import requests
+import sys
+from requests.auth import HTTPBasicAuth
+import threading
+payload = HTTPBasicAuth('admin', 'admin')
+content_type = 'image/jpeg'
+headers = {'content-type': content_type}
+url = 'http://127.0.0.1:8000/upload/'
+device = int(sys.argv[1])
 from datetime import datetime
 class Webcam:
     phone = 1
@@ -10,7 +19,7 @@ class Video:
         self.record = False
         self.startTime = None
         self.endTime = None
-        self.vid = cv2.VideoCapture(Webcam.laptop)
+        self.vid = cv2.VideoCapture(device)
         self.msg = 'Press Spacebar to start recording'
         self.seconds_to_run = seconds_to_run
         self.FPS = 2
@@ -18,13 +27,15 @@ class Video:
         self.total_frames = 0
         self.total_run_time = 0
         self.prev = 0
+        self.QUEUE = []
     
     def show(self):
         cv2.namedWindow(self.name) 
         while(True):
             _, frame = self.vid.read()
-            frame = cv2.putText(frame, str(self.msg), (20,40),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255),1, cv2.LINE_AA)
-            # cv2.imwrite(f"images\{len(frames)}.png", frame)  
+            modified_frame = frame.copy()
+            modified_frame = cv2.putText(modified_frame, str(self.msg), (20,40),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255),1, cv2.LINE_AA)
+            # cv2.imwrite(f"I{len(self.frames)}.png", frame)  
             if self.record:
                 self.msg = f"""{self.endTime - self.startTime} | Press Spacebar to stop recording"""
                 self.endTime = datetime.now()
@@ -34,7 +45,7 @@ class Video:
                         self.startStopRecord()
                 self.addFrame(frame)
             
-            cv2.imshow(self.name, frame)
+            cv2.imshow(self.name, modified_frame)
             waitKey = cv2.waitKey(1) 
             if waitKey:
                 if waitKey & 0xFF == ord(' '):
@@ -76,11 +87,41 @@ class Video:
         self.frames.append(frame)
 
     def save(self):
+        '''
+            Gives the interval at which the frames should be saved to get required frames per second uniformly
+        '''
         interval = len(self.frames) / (self.FPS + 1)
         print('Interval' , interval)
         for i in range(1, self.FPS + 1):
-            print(round(i * interval))
+            frame_number = round(i * interval)
+            print(frame_number)
+            # self.send(self.frames[frame_number])
+            # sending = threading.Thread(target=self.enqueue_frames, args=(self.frames[frame_number],))
+            # sending.start()
 
+
+
+    def send(self, frame):
+        
+        import os
+        print('Sending Images ...')
+
+        # print('Sending Complete ...')
+
+        p = cv2.imwrite(f'./temp.jpg', frame)
+        f = open('./temp.jpg','rb' )
+        response = requests.post(url, auth=payload , files= {'image':f})
+        f.close()
+        os.remove('./temp.jpg')
+        print(response.text)
+        return True
+
+    def enqueue_frames(self, frame):
+        # send(frame)
+        pass
+
+    def now(self):
+        return datetime.now().timestamp()
 
     def quit(self):
         self.vid.release()

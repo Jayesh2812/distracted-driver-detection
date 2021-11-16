@@ -4,7 +4,10 @@ from rest_framework.response import Response
 from rest_framework import status
 from .models import Image
 from .serializers import ImageSerializer
-
+import cv2
+import numpy as np 
+import base64
+from django.core.files.base import ContentFile
 # Create your views here.
 
 class ImageUploadAPI(APIView):
@@ -34,3 +37,6 @@ class ImageUploadAPI(APIView):
     def get(self, request, *args, **kwargs):
         images = [ImageSerializer(image).data for image in Image.objects.all()]
         return Response(data = images )
+
+
+# class EncodedImageUploadAPI(APIView):
