@@ -16,16 +16,16 @@ def update_filename(intance, filename):
 
 class Image(models.Model):
     classLabels = [
-        ('0' , "reaching behind"),
-        ('1' , "talking on the phone - left"),
-        ('2' , "operating the radio"),
-        ('3' , "talking to passenger"),
-        ('4' , "texting - left"),
-        ('5' , "drinking"),
-        ('6' , "hair and makeup"),
-        ('7' , "texting - right"),
-        ('8' , "talking on the phone - right"),
-        ('9' , "safe driving")
+        ('0' , "drinking"),
+        ('1' , "hair and makeup"),
+        ('2' , "reaching behind"),
+        ('3' , "operating the radio"),
+        ('4' , "safe driving"),
+        ('5' , "talking on the phone - left"),
+        ('6' , "talking on the phone - right"),
+        ('7' , "talking to passenger"),
+        ('8' , "texting - left"),
+        ('9' , "texting - right")
     ]
     image = models.ImageField(upload_to = update_filename)
     uploaded_at = models.DateTimeField(blank = True, null = True)
