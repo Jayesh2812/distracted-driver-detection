@@ -9,29 +9,33 @@ from datetime import timezone, datetime
 # Create your models here.
 
 
-def update_filename(intance, filename):
+def update_filename(instance : 'Image', filename : str):
     last_image = Image.objects.last()
     id = last_image.id if last_image else 0
     return f"Image_{id}.{filename.split('.')[-1]}"
 
 class Image(models.Model):
     classLabels = [
-        ('0' , "reaching behind"),
-        ('1' , "talking on the phone - left"),
-        ('2' , "operating the radio"),
-        ('3' , "talking to passenger"),
-        ('4' , "texting - left"),
-        ('5' , "drinking"),
-        ('6' , "hair and makeup"),
-        ('7' , "texting - right"),
-        ('8' , "talking on the phone - right"),
-        ('9' , "safe driving")
+        ('0' , "drinking"),
+        ('1' , "hair and makeup"),
+        ('2' , "reaching behind"),
+        ('3' , "operating the radio"),
+        ('4' , "safe driving"),
+        ('5' , "talking on the phone - left"),
+        ('6' , "talking on the phone - right"),
+        ('7' , "talking to passenger"),
+        ('8' , "texting - left"),
+        ('9' , "texting - right")
     ]
     image = models.ImageField(upload_to = update_filename)
     uploaded_at = models.DateTimeField(blank = True, null = True)
     classified_as = models.CharField(max_length = 1, choices = classLabels, null = True, default = None)
 
+    @property
+    def path(self):
+        return settings.BASE_DIR / settings.MEDIA_URL / str(self.image)
 
+# set uploaded time only when the image is created
 @receiver(post_save, sender=Image) 
 def add_uploaded_time(sender, instance: Image, created : bool, **kwargs):
     if created:
@@ -40,9 +44,9 @@ def add_uploaded_time(sender, instance: Image, created : bool, **kwargs):
 
 
 
-
+# Delete actual image if the object is deleted
 @receiver(post_delete, sender = Image)
-def delete_actual_image(sender, instance, *args, **kwargs):
+def delete_actual_image(sender, instance : Image , *args, **kwargs):
     os.remove(f"{settings.MEDIA_ROOT}\{instance.image}")
 
 

@@ -1,11 +1,16 @@
 import cv2
-vid = cv2.VideoCapture(1)
-cv2.namedWindow('frame') 
-while(True):
-    ret, frame = vid.read()
-    # frames.append(frame)
-    cv2.imshow('frame', frame)
-    # cv2.imwrite(f"images\{len(frames)}.png", frame)  
+import base64
+import requests
+from requests.auth import HTTPBasicAuth
+auth = HTTPBasicAuth('admin', 'admin')
+img = cv2.imread('./__pycache__/img_100003.jpg')
+base64_str = base64.b64encode(cv2.imencode('.jpg', img)[1]).decode()
 
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
+response = requests.post(
+        url="http://localhost:8000/upload-encoded/",
+        data={"image" : base64_str}, 
+        auth = auth
+    )
+print(response.json())
+
+  

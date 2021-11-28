@@ -13,7 +13,7 @@ def classify_selected_images(modeladmin, request, images):
         classify_image(image.id)
 
 class ImageAdmin(ImportExportModelAdmin):
-    list_display = ['image_name', 'preview', 'link', 'uploaded_at', 'classified']
+    list_display = ['image_name', 'preview', 'link', 'uploaded_at', 'classified_as']
     actions = [classify_selected_images]
 
     def image_name(self, obj):
