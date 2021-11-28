@@ -3,15 +3,17 @@ import requests
 import sys
 from requests.auth import HTTPBasicAuth
 import threading
+import base64
 payload = HTTPBasicAuth('admin', 'admin')
 content_type = 'image/jpeg'
 headers = {'content-type': content_type}
-url = 'http://127.0.0.1:8000/upload/'
-device = int(sys.argv[1])
+url = 'http://127.0.0.1:8000/upload-encoded/'
+# device = int(sys.argv[1])
 from datetime import datetime
-class Webcam:
+class Camera:
     phone = 1
     laptop = 0
+device = Camera.laptop
 class Video:
     def __init__(self, name = 'Frames', seconds_to_run=10):
         self.name = name
@@ -90,31 +92,48 @@ class Video:
         '''
             Gives the interval at which the frames should be saved to get required frames per second uniformly
         '''
-        interval = len(self.frames) / (self.FPS + 1)
-        print('Interval' , interval)
-        for i in range(1, self.FPS + 1):
-            frame_number = round(i * interval)
-            print(frame_number)
+        chosen_index = 3
+        index = 0 if len(self.frames) <= chosen_index else chosen_index
+
+        try: 
+            frame = self.frames[index]
+            base64_frame = base64.b64encode(cv2.imencode('.jpg', frame)[1]).decode()
+            print(len(base64_frame))
+            try: 
+                sending = threading.Thread(target=self.send, args=(base64_frame,))
+                sending.start()
+                # self.send(base64_frame)
+            except Exception as e:
+                raise e
+        except IndexError as e:
+            print("Frames List is Empty")
+            raise e
+
+        # interval = len(self.frames) / (self.FPS + 1)
+        # print('Interval' , interval)
+        # for i in range(1, self.FPS + 1):
+        #     frame_number = round(i * interval)
+        #     print(frame_number)
             # self.send(self.frames[frame_number])
             # sending = threading.Thread(target=self.enqueue_frames, args=(self.frames[frame_number],))
             # sending.start()
 
 
 
-    def send(self, frame):
-        
-        import os
-        print('Sending Images ...')
+    def send(self, frame_encoded):
+        import requests
+        from requests.auth import HTTPBasicAuth
+        import time
+        start = time.time()
+        auth = HTTPBasicAuth('admin', 'admin')
+        response = requests.post(
+            url="http://localhost:8000/upload-encoded/",
+            data={"image" : frame_encoded}, 
+            auth = auth
+        )
+        end = time.time()
+        print("Time taken to upload: ", end-start)
 
-        # print('Sending Complete ...')
-
-        p = cv2.imwrite(f'./temp.jpg', frame)
-        f = open('./temp.jpg','rb' )
-        response = requests.post(url, auth=payload , files= {'image':f})
-        f.close()
-        os.remove('./temp.jpg')
-        print(response.text)
-        return True
 
     def enqueue_frames(self, frame):
         # send(frame)
