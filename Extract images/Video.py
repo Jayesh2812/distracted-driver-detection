@@ -1,40 +1,51 @@
+from typing import Union
 import cv2
 import requests
 import sys
 from requests.auth import HTTPBasicAuth
 import threading
 import base64
-payload = HTTPBasicAuth('admin', 'admin')
-content_type = 'image/jpeg'
-headers = {'content-type': content_type}
-url = 'http://127.0.0.1:8000/upload-encoded/'
-# device = int(sys.argv[1])
 from datetime import datetime
 class Camera:
     phone = 1
     laptop = 0
-device = Camera.laptop
+
 class Video:
-    def __init__(self, name = 'Frames', seconds_to_run=10):
-        self.name = name
+    def __init__(self, source : Union[int, str] , name : str = 'Frames', seconds_to_run : Union[int, None] = 10):
+        '''
+            Initializes Video Capture and defines variables to be used across the class
+            :param source
+        '''
+        self.name = name 
         self.frames=[]
         self.record = False
         self.startTime = None
         self.endTime = None
-        self.vid = cv2.VideoCapture(device)
+        self.is_pre_recorded_video = isinstance(source, str)
+        self.vid = cv2.VideoCapture(source)
         self.msg = 'Press Spacebar to start recording'
         self.seconds_to_run = seconds_to_run
-        self.FPS = 2
+        self.FPS_limit = 30
+        self.enable_FPS_limiter = False
         self.max_fps = 0
         self.total_frames = 0
         self.total_run_time = 0
         self.prev = 0
-        self.QUEUE = []
+        self.stop_send = False
+        self.time_interval = 1
     
     def show(self):
         cv2.namedWindow(self.name) 
+        _, frame = self.vid.read()
+
         while(True):
-            _, frame = self.vid.read()
+            if not self.is_pre_recorded_video or self.record:
+                _, frame = self.vid.read()
+
+            if frame is None:
+                self.quit()
+                return
+
             modified_frame = frame.copy()
             modified_frame = cv2.putText(modified_frame, str(self.msg), (20,40),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255),1, cv2.LINE_AA)
             # cv2.imwrite(f"I{len(self.frames)}.png", frame)  
@@ -78,7 +89,7 @@ class Video:
         
     def addFrame(self, frame):
         self.total_frames += 1
-        if datetime.now().timestamp() - self.prev.timestamp() > 1:
+        if datetime.now().timestamp() - self.prev.timestamp() > self.time_interval or (self.enable_FPS_limiter and len(self.frames) > self.FPS_limit):
             self.prev = datetime.now()
             if len(self.frames) > self.max_fps:
                 self.max_fps = len(self.frames)
@@ -98,10 +109,10 @@ class Video:
         try: 
             frame = self.frames[index]
             base64_frame = base64.b64encode(cv2.imencode('.jpg', frame)[1]).decode()
-            print(len(base64_frame))
             try: 
                 sending = threading.Thread(target=self.send, args=(base64_frame,))
-                sending.start()
+                if not self.stop_send:
+                    sending.start()
                 # self.send(base64_frame)
             except Exception as e:
                 raise e
@@ -161,6 +172,6 @@ class Video:
         print('----------------------------------------------------------')
         return data
 
-video = Video(seconds_to_run=0)
-video.show()
-# print(video.details())
+if __name__ == "__main__":
+    video = Video(seconds_to_run=2)
+    video.show()
