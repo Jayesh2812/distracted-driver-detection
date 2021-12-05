@@ -33,6 +33,7 @@ class Video:
         self.prev = 0
         self.stop_send = False
         self.time_interval = 1
+        self.flip = False
     
     def show(self):
         cv2.namedWindow(self.name) 
@@ -41,12 +42,16 @@ class Video:
         while(True):
             if not self.is_pre_recorded_video or self.record:
                 _, frame = self.vid.read()
+                
+            if self.flip:
+                frame = cv2.flip(frame, 1)
 
             if frame is None:
                 self.quit()
                 return
 
             modified_frame = frame.copy()
+            cv2.rectangle(modified_frame, (20,25), (len(self.msg)*9, 45), (0,0,0), -1)
             modified_frame = cv2.putText(modified_frame, str(self.msg), (20,40),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255),1, cv2.LINE_AA)
             # cv2.imwrite(f"I{len(self.frames)}.png", frame)  
             if self.record:
