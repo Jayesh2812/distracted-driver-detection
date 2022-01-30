@@ -89,3 +89,9 @@ class EncodedImageUploadAPI(ImageUploadAPI):
 
         return Response(data={'message':'Image created'}, status=status.HTTP_201_CREATED)
             
+def main_view(request):
+    return render(request, 'main/graph.html')
+
+def gallery_view(request):
+    images = Image.objects.all()
+    return render(request, 'main/gallery.html', {'images': images})

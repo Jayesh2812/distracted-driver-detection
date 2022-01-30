@@ -1,17 +1,70 @@
-<input type="datetime-local" name="" id="haha" >
+<html>
+  <head>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+      google.charts.load('current', {'packages':['bar']});
+      google.charts.setOnLoadCallback(drawChart);
 
-<script>
-    document.querySelector('#haha').onblur = (e)=>{
-        let d = new Date(e.target.value)
+      function drawChart() {
+        var data = google.visualization.arrayToDataTable([
+          ['Year', 'Sales', 'Expenses', 'Profit'],
+          ['2014', 1000, 400, 200],
+          ['2015', 1170, 460, 250],
+          ['2016', 660, 1120, 300],
+          ['2017', 1030, 540, 350]
+        ]);
 
-        console.log(d.toISOString())
-    }
-</script>
+        var options = {
+          chart: {
+            title: 'Company Performance',
+            subtitle: 'Sales, Expenses, and Profit: 2014-2017',
+          },
+        };
 
+        var chart = new google.charts.Bar(document.getElementById('columnchart_material'));
 
-duration : 1223344
-
-duration :{days : 12, seconds :12}
-startTime : '2021-06-19T18:46:22.890403+00:00'
-
-[sensor_name, '2021-07-18T15:20:31.715488+00:00', '2021-07-18T15:20:31.715488+00:00']
+        chart.draw(data, google.charts.Bar.convertOptions(options));
+      }
+    </script>
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+      <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+  </head>
+  <body>
+    <div id="columnchart_material" style="width: 500px; height: 300px;"></div>
+    <div id="carouselExampleControls" style="width: 500px; height: 300px;" class="carousel slide" data-ride="carousel">
+      <div class="carousel-inner">
+        <div class="carousel-item active">
+          <img class="d-block w-200" src="https://picsum.photos/500/200?random=1" alt="First slide">
+          <div class="carousel-caption d-none d-md-block">
+            <h5>Title</h5>
+            <p>Para</p>
+          </div>
+        </div>
+        <div class="carousel-item">
+          <img class="d-block w-200" src="https://picsum.photos/500/200?random=2" alt="Second slide">
+          <div class="carousel-caption d-none d-md-block">
+            <h5>Title</h5>
+            <p>Para</p>
+          </div>
+        </div>
+        <div class="carousel-item">
+          <img class="d-block w-200" src="https://picsum.photos/500/200?random=3" alt="Third slide">
+          <div class="carousel-caption d-none d-md-block">
+            <h5>Title</h5>
+            <p>Para</p>
+          </div>
+        </div>
+      </div>
+      <a class="carousel-control-prev" href="#carouselExampleControls" role="button" data-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="sr-only">Previous</span>
+      </a>
+      <a class="carousel-control-next" href="#carouselExampleControls" role="button" data-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="sr-only">Next</span>
+      </a>
+    </div>
+  </body>
+</html>

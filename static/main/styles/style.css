@@ -1,0 +1,23 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+:root{
+    
+}
+html{
+    
+}
+body{
+    
+}
+main{
+    display: grid;
+    min-height: 100vh;
+    place-content: center;
+}
+#columnchart_material{
+    width: 80vw;
+    height: 80vh;
+}
