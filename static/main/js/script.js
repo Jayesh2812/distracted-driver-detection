@@ -3,18 +3,15 @@ const init = () => {
       google.charts.setOnLoadCallback(drawChart);
 
       function drawChart() {
-        var data = google.visualization.arrayToDataTable([
-          ['Year', 'Sales'],
-          ['2014', 1000,],
-          ['2015', 1170,],
-          ['2016', 660, ],
-          ['2017', 1030,]
+        var finalData = google.visualization.arrayToDataTable([
+          ['Class Labels', 'Count'],
+          ...data
         ]);
 
         var options = {
           chart: {
-            title: 'Company Performance',
-            subtitle: 'Sales, Expenses, and Profit: 2014-2017',
+            title: 'Different Driving Positions Frequency Comparison',
+            subtitle: 'Driver\'s behaviour analysis using deep learning',
           },
           animation: {"startup": true,
             duration: 1000,
@@ -24,8 +21,8 @@ const init = () => {
 
         var chart = new google.charts.Bar(document.getElementById('columnchart_material'));
 
-        chart.draw(data, google.charts.Bar.convertOptions(options));
-        window.addEventListener('resize', () => {chart.draw(data, google.charts.Bar.convertOptions(options));})
+        chart.draw(finalData, google.charts.Bar.convertOptions(options));
+        window.addEventListener('resize', () => {chart.draw(finalData, google.charts.Bar.convertOptions(options));})
 
       }
 }

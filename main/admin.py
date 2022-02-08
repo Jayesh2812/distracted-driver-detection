@@ -15,6 +15,7 @@ def classify_selected_images(modeladmin, request, images):
 class ImageAdmin(ImportExportModelAdmin):
     list_display = ['image_name', 'preview', 'link', 'uploaded_at', 'classified_as']
     actions = [classify_selected_images]
+    list_filter = ['classified_as']
 
     def image_name(self, obj):
         return obj.image

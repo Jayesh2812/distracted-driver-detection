@@ -9,6 +9,7 @@ import cv2
 import numpy as np 
 import base64
 from django.core.files.base import ContentFile
+from django.db.models import Q, Count
 # Create your views here.
 
 class ImageUploadAPI(APIView):
@@ -90,7 +91,12 @@ class EncodedImageUploadAPI(ImageUploadAPI):
         return Response(data={'message':'Image created'}, status=status.HTTP_201_CREATED)
             
 def main_view(request):
-    return render(request, 'main/graph.html')
+    classified_images = Image.objects.filter(~Q(classified_as = None))
+    class_labels = dict(Image.classLabels)
+    class_label_no_count = classified_images.values('classified_as').annotate(count = Count("classified_as"))
+    class_label_count = [[ class_labels[i['classified_as']] , i['count'] ] for i in class_label_no_count]
+    print(class_label_count)
+    return render(request, 'main/graph.html', {'class_label_count': class_label_count})
 
 def gallery_view(request):
     images = Image.objects.all()
