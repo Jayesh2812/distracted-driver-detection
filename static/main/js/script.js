@@ -1,5 +1,5 @@
 const init = () => {
-    google.charts.load('current', {'packages':['bar']});
+    google.charts.load('current', {'packages':['bar', 'corechart']});
       google.charts.setOnLoadCallback(drawChart);
 
       function drawChart() {
@@ -13,16 +13,20 @@ const init = () => {
             title: 'Different Driving Positions Frequency Comparison',
             subtitle: 'Driver\'s behaviour analysis using deep learning',
           },
-          animation: {"startup": true,
-            duration: 1000,
-            easing: 'out',
-          }
         };
 
-        var chart = new google.charts.Bar(document.getElementById('columnchart_material'));
+        var barChart = new google.charts.Bar(document.getElementById('columnchart_material'));
+        var pieChart = new google.visualization.PieChart(document.getElementById('piechart'))
 
-        chart.draw(finalData, google.charts.Bar.convertOptions(options));
-        window.addEventListener('resize', () => {chart.draw(finalData, google.charts.Bar.convertOptions(options));})
+        barChart.draw(finalData, options);
+        options = options.chart
+        pieChart.draw(finalData, options);
+        
+        window.addEventListener('resize', () => {
+          barChart.draw(finalData, options);
+          pieChart.draw(finalData, options);
+
+        })
 
       }
 }
