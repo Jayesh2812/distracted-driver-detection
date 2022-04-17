@@ -18,7 +18,7 @@ class Video:
         '''
         self.name = name 
         self.frames=[]
-        self.record = False
+        self.is_recording = False
         self.startTime = None
         self.endTime = None
         self.is_pre_recorded_video = isinstance(source, str)
@@ -38,13 +38,13 @@ class Video:
     def show(self):
         cv2.namedWindow(self.name) 
         _, frame = self.vid.read()
+        frame = cv2.flip(frame, 1) if self.flip else frame
 
         while(True):
-            if not self.is_pre_recorded_video or self.record:
+            if not self.is_pre_recorded_video or self.is_recording:
                 _, frame = self.vid.read()
-                
-            if self.flip:
-                frame = cv2.flip(frame, 1)
+                frame = cv2.flip(frame, 1) if self.flip else frame
+
 
             if frame is None:
                 self.quit()
@@ -53,8 +53,8 @@ class Video:
             modified_frame = frame.copy()
             cv2.rectangle(modified_frame, (20,25), (len(self.msg)*9, 45), (0,0,0), -1)
             modified_frame = cv2.putText(modified_frame, str(self.msg), (20,40),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255),1, cv2.LINE_AA)
-            # cv2.imwrite(f"I{len(self.frames)}.png", frame)  
-            if self.record:
+
+            if self.is_recording:
                 self.msg = f"""{self.endTime - self.startTime} | Press Spacebar to stop recording"""
                 self.endTime = datetime.now()
 
@@ -64,7 +64,8 @@ class Video:
                 self.addFrame(frame)
             
             cv2.imshow(self.name, modified_frame)
-            waitKey = cv2.waitKey(1) 
+
+            waitKey = cv2.waitKey(25) # Wait Untill this milliseconds before showing next frame
             if waitKey:
                 if waitKey & 0xFF == ord(' '):
                     self.startStopRecord()
@@ -73,14 +74,14 @@ class Video:
                     break
 
     def startStopRecord(self):
-        # if not self.record:
+        # if not self.is_recording:
         #     self.seconds_to_run = int(input("Enter no of seconds : ") or 0)
         #     print(self.seconds_to_run)
         if not self.total_run_time:
             self.total_run_time = datetime.now()
 
-        self.record = not self.record
-        if not self.record:
+        self.is_recording = not self.is_recording
+        if not self.is_recording:
             self.msg = f"""{self.endTime - self.startTime} | Press Q to quit | Press Spacebar to Restart recording """
             if len(self.frames) > self.max_fps:
                 self.max_fps = len(self.frames)
