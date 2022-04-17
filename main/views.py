@@ -1,44 +1,45 @@
 from django.shortcuts import render
 from six import string_types
-from rest_framework.views import APIView 
+from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .models import Image
 from .serializers import ImageSerializer
 import cv2
-import numpy as np 
+import numpy as np
 import base64
+import json
 from django.core.files.base import ContentFile
+from django.conf import settings
 from django.db.models import Q, Count
 # Create your views here.
+
 
 class ImageUploadAPI(APIView):
     def get_queryset(self):
         return Image.objects.all()
-    
+
     def post(self, request, *args, **kwargs):
         try:
             images = dict(request.FILES)['image']
             for image in images:
-                image = ImageSerializer(data = {'image' : image})
+                image = ImageSerializer(data={'image': image})
                 if image.is_valid():
                     image.save()
                 else:
-                    return Response(data={'message':image.errors}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+                    return Response(data={'message': image.errors}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
 
-            return Response(data={'message':'Images uploaded successfully'}, status=status.HTTP_201_CREATED)
-            
+            return Response(data={'message': 'Images uploaded successfully'}, status=status.HTTP_201_CREATED)
+
         except KeyError:
-            image = ImageSerializer(data = request.FILES)
+            image = ImageSerializer(data=request.FILES)
             if not image.is_valid():
-                return Response(data={'message':image.errors}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
-
-            
-
+                return Response(data={'message': image.errors}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
 
     def get(self, request, *args, **kwargs):
         images = [ImageSerializer(image).data for image in Image.objects.all()]
-        return Response(data = images )
+        return Response(data=images)
+
 
 def decode_base64_file(data):
 
@@ -69,7 +70,8 @@ def decode_base64_file(data):
             TypeError('invalid_image')
 
         # Generate file name:
-        file_name = str(uuid.uuid4())[:12] # 12 characters are more than enough.
+        # 12 characters are more than enough.
+        file_name = str(uuid.uuid4())[:12]
         # Get the file name extension:
         file_extension = get_file_extension(file_name, decoded_file)
 
@@ -77,27 +79,37 @@ def decode_base64_file(data):
 
         return ContentFile(decoded_file, name=complete_file_name)
 
+
 class EncodedImageUploadAPI(ImageUploadAPI):
     def post(self, request, *args, **kwargs):
         print(request.POST.get('image')[:100])
         # image = Image(image=decode_base64_file(request.POST.get('image')))
         # image.save()
-        image = ImageSerializer(data = {'image': decode_base64_file(request.POST.get('image'))})
+        image = ImageSerializer(
+            data={'image': decode_base64_file(request.POST.get('image'))})
         if image.is_valid():
             image.save()
         else:
-            return Response(data={'message':image.errors}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(data={'message': image.errors}, status=status.HTTP_400_BAD_REQUEST)
 
-        return Response(data={'message':'Image created'}, status=status.HTTP_201_CREATED)
-            
+        return Response(data={'message': 'Image created'}, status=status.HTTP_201_CREATED)
+
+
 def main_view(request):
-    classified_images = Image.objects.filter(~Q(classified_as = None))
+    classified_images = Image.objects.filter(~Q(classified_as=None))
     class_labels = dict(Image.classLabels)
-    class_label_no_count = classified_images.values('classified_as').annotate(count = Count("classified_as"))
-    class_label_count = [[ class_labels[i['classified_as']] , i['count'] ] for i in class_label_no_count]
+    class_label_no_count = classified_images.values(
+        'classified_as').annotate(count=Count("classified_as"))
+    class_label_count = [[class_labels[i['classified_as']],
+                          i['count']] for i in class_label_no_count]
     print(class_label_count)
     return render(request, 'main/graph.html', {'class_label_count': class_label_count})
 
+
 def gallery_view(request):
-    images = Image.objects.all()
-    return render(request, 'main/gallery.html', {'images': images})
+    server_prefix = request.build_absolute_uri('/')[:-1]
+    images_objs = Image.objects.all()
+    images = [{'image_name': str(image.image), 'uploaded_at': image.uploaded_at.timestamp(),
+               'classified_as': image.get_classified_as_display(), 'image_url': f'{server_prefix}{settings.MEDIA_URL}{image.image}'} for image in images_objs]
+    image_data = json.dumps(images)
+    return render(request, 'main/gallery.html', {'image_data': image_data, 'images': images_objs})
